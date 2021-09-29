@@ -3,6 +3,7 @@
 # email: szixin@umich.edu
 
 import unittest
+import random
 
 # The Customer class
 # The Customer class represents a customer who will order from the stalls.
@@ -25,6 +26,13 @@ class Customer:
         elif self.wallet < stall.compute_cost(quantity): 
             print("Don't have enough money for that :( Please reload more money!")
         else:
+            #extra credits, 5% chance to win $10
+            cashier.numOfCustomers += 1
+            if cashier.numOfCustomers % 10 == 0: #every 10th
+                r = random.random(0, 1)
+                if r < 0.05: 
+                    self.reload_money(10)
+            #nothing below changed
             bill = cashier.place_order(stall, item_name, quantity) 
             self.submit_order(cashier, stall, bill) 
     
@@ -48,6 +56,7 @@ class Cashier:
     def __init__(self, name, directory =[]):
         self.name = name
         self.directory = directory[:] # make a copy of the directory
+        self.numOfCustomers = 0
 
     # Whether the stall is in the cashier's directory
     def has_stall(self, stall):
@@ -68,6 +77,8 @@ class Cashier:
     def place_order(self, stall, item, quantity):
         stall.process_order(item, quantity)
         return stall.compute_cost(quantity) 
+        
+
     
     # string function.
     def __str__(self):
@@ -203,7 +214,7 @@ class TestAllMethods(unittest.TestCase):
         self.assertEqual(self.f1.wallet, wallet_before_f1, "test not enough money failed")
         
 		# case 2: test if the stall doesn't have enough food left in stock
-        self.f1.reload_money(10000)
+        self.f1.reload_money(10000) #give the customer enough money to order
         self.f1.validate_order(self.c1, self.s1, "Taco", 60)
         self.assertEqual(self.f1.wallet, wallet_before_f1 + 10000, "test not enough food failed")
 
@@ -220,7 +231,7 @@ class TestAllMethods(unittest.TestCase):
         self.f1.reload_money(300)
         self.assertEqual(self.f1.wallet, wallet_before+300, "test add money failed")
     
-    
+
 ### Write main function
 def main():
     #Create different objects 
@@ -246,16 +257,16 @@ def main():
     print("")
     #case 2: the casher has the stall, but not enough ordered food or the ordered food item
     c1.validate_order(cashier1, s1, "salad", 10)
-    c2.validate_order(cashier1, s1, "salad", 10)
+    c2.validate_order(cashier1, s1, "chips", 6)
     c3.validate_order(cashier1, s1, "salad", 10)
     print("")
     #case 3: the customer does not have enough money to pay for the order: 
     c1.validate_order(cashier1, s1, "ice cream", 10)
     c2.validate_order(cashier1, s1, "ice cream", 10)
     c3.validate_order(cashier2, s2, "donut", 2000)
-    
+    print("")
     #case 4: the customer successfully places an order
-    c1.validate_order(cashier1, s1, "ice cream", 5)
+    c1.validate_order(cashier1, s1, "ice cream", 1)
     c2.validate_order(cashier1, s1, "chips", 2)
     c3.validate_order(cashier2, s2, "donut", 10)
 
